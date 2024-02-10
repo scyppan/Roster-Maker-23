@@ -288,12 +288,14 @@ async function getdefaultplayers() {
     let lines=defaultplayersdata.split('\n');
     lines.shift();
     
+    console.log(lines[5].split('\t'));
+
     let theseplayers = [];
     
     lines.forEach(line=>{
       let thislinestring = line.split("\t");
       let thisline = castarrayasint(thislinestring);
-      if(thisline[101]!=0){//ensures that the player has an ID
+      if(thisline[100]!=0){//ensures that the player has an ID
         if(Number.isNaN(thisline[0])){}else{
           theseplayers.push(thisline);
         }
