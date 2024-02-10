@@ -279,29 +279,27 @@ function loggerupdate(newtext){
 async function getdefaultplayers() {
   
   try {
-    const response = await fetch('https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.8/players-plain.txt');
+    const response = await fetch('https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.10/origplayers.txt');
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
     defaultplayersdata = await response.text(); // Assign fetched data
+
     let lines=defaultplayersdata.split('\n');
-    console.log(lines.length);
-    lines.shift();console.log(lines.length);
-
+    lines.shift();
+    
     let theseplayers = [];
-
-    console.log(lines[5]);
     
     lines.forEach(line=>{
       let thislinestring = line.split("\t");
       let thisline = castarrayasint(thislinestring);
-      if(thisline[100]!=0){//ensures that the player has an ID
+      if(thisline[101]!=0){//ensures that the player has an ID
         if(Number.isNaN(thisline[0])){}else{
           theseplayers.push(thisline);
         }
       }
     });
-
+    oldplayers = theseplayers;
     document.getElementById("outercontainer").style.display = "block";
   } catch (error) {
     console.error('There has been a problem with your fetch operation:', error);
