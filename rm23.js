@@ -1,49 +1,30 @@
 let newplayers = [];
 let oldplayers=[];
+let defaultplayersdata; // This will be assigned the fetched data
 
 function defaultplayertbltgl() {
   document.getElementById("uploadplayertblcontainer").style.display = document.getElementById("usedefault").checked ? "none" : "block";
 }
 
-async function processFile(file) {
-  try {
-    const foundplayers = await readplayertable(file);
-    // Code here will wait until the promise resolves
-    console.log(foundplayers);
-  } catch (error) {
-    // Handle errors
-    console.error(error);
+function loadplayertable(whichfile) {
+  let file = null;
+  
+  if (whichfile == "default") {
+    loggerupdate("• Getting player table file");
+    file = document.getElementById("defaultplayertable");
+  } else {
+    loggerupdate("• Getting player table file");
+    file = document.getElementById("uploadplayertbl").files[0];
   }
-}
 
-//q: There's a file in this directory called defaultplayers.txt. Will this line: const response = await fetch('./defaultplayers.txt'); work?
-//a: No, it will not work. The fetch API is meant for use with HTTP requests, not local files. You can use the FileReader API to read local files.
-
-async function loadplayertable(whichfile) {
-  let file;
-
-  try {
-    if (whichfile == "default") {
-      loggerupdate("• Getting player table file");
-      const response = await fetch('./defaultplayers.txt');
-      const data = await response.text();
-      file = new Blob([data], { type: 'text/plain' }); // Convert text to a Blob if necessary
-    } else {
-      loggerupdate("• Getting player table file");
-      file = document.getElementById("uploadplayertbl").files[0];
-    }
-
-    if (!file) {
-      throw new Error('File is not selected or fetched.');
-    }
-
-    loggerupdate("• Loading player table");
-    oldplayers = await readplayertable(file); // Assuming readplayertable can handle both text and File/Blob inputs
-    loggerupdate("• Player table loaded (" + oldplayers.length + " players found)");
-  } catch (error) {
-    console.error('Error:', error);
-    loggerupdate("• Failed to load player table");
+  if (!file) {
+    loggerupdate("• Failed to get player table file");
   }
+
+  loggerupdate("• Loading player table");
+  oldplayers = readplayertable(file); // Assuming readplayertable can handle both text and File/Blob inputs
+  loggerupdate("• Player table loaded (" + oldplayers.length + " players found)");
+  
 }
 
 function loadtemplate(){
@@ -99,15 +80,15 @@ function loadtemplate(){
 		}	
 	  });
 	  	loggerupdate("• " + newplayers.length + " players loaded");
-      
+      document.getElementById("chkreqbtn").disabled = false;
 	}   
 }
 
 function makeplayers(){
+    
     if(document.getElementById("usedefault").checked){
-      loadplayertable("default"){
-        
-      }
+      loggerupdate("• loading default player table");
+      loadplayertable("default");
     }
 
     loggerupdate("• Checking requirements");
@@ -269,7 +250,10 @@ function buildrow(givenname, surname, demo, appr, attr){
 function checkrequirements(){
   let issue=false;
 
-  if(!document.getElementById("usedefault").checked){
+  if(document.getElementById("usedefault").checked){
+    loggerupdate("• Using default player table");
+
+  }else{
     if(!document.getElementById("uploadplayertbl").files[0]){
       loggerupdate("• No player table file selected");
       issue=true;
@@ -281,7 +265,9 @@ function checkrequirements(){
     issue=true;
   }
   
-  return !issue; //if there's an issue, requirements are NOT met. So we return the opposite of issue.
+  if(!issue){
+    document.getElementById("mkplybtn.disabled") = false;
+  }
 
 }
 
@@ -289,3 +275,45 @@ function loggerupdate(newtext){
 	let oldtext = document.getElementById("logger").value;
 	document.getElementById("logger").value = newtext + "\n" + oldtext.trim() ;
 }
+
+async function getdefaultplayers() {
+  
+  try {
+    const response = await fetch('https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.7/defaultplayers.txt');
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    defaultplayersdata = await response.text(); // Assign fetched data
+    let lines=defaultplayersdata.split('\n');
+    console.log(lines.length);
+    lines.shift();console.log(lines.length);
+
+    let theseplayers = [];
+
+    console.log(lines[5]);
+    let tstarray = lines[5].split('\t');
+    tstarray.forEach(item=>{item.replace(/\u0000/g, '');parseInt(item)});
+    console.log(tstarray);
+
+    lines.forEach(line=>{
+      let thislinestring = line.split("\t");
+      let thisline = castarrayasint(thislinestring);
+      if(thisline[100]!=0){//ensures that the player has an ID
+        if(Number.isNaN(thisline[0])){}else{
+          theseplayers.push(thisline);
+        }
+      }
+    });
+
+    document.getElementById("outercontainer").style.display = "block";
+  } catch (error) {
+    console.error('There has been a problem with your fetch operation:', error);
+  }  
+  
+}
+
+function startup(){
+  
+}
+
+getdefaultplayers();

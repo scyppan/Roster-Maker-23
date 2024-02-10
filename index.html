@@ -20,6 +20,8 @@ Here's where the cdn scripts go.
 <h5>ROSTER MAKER 23<br>
     by Liio</h5>
 
+<div id="outercontainer" style="display:none">
+
 <input type="checkbox" id="usedefault" onchange="defaultplayertbltgl()" checked="true"> Use Default Player Table</input><br><br>
 
 <div id="uploadplayertblcontainer" style="display:none">
@@ -30,6 +32,9 @@ Upload Template File <input type="file" id="uploadtemplate" style="overflow: vis
 
 <br><br>
 
-<button onchange="makeplayers()">Make Players</button>
+<button id="chkreqbtn" onclick="checkrequirements()" disabled="true">Check Requirements</button>
+<button id="mkplybtn" onclick="makeplayers()" disabled="true">Make Players</button>
 
 <textarea id="logger" readonly style="width: 95%; height: 85%;"></textarea>
+
+</div>
