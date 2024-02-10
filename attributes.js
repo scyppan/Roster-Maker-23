@@ -313,3 +313,7 @@ function getattributevalue(ovr){
     let rnd = randbetween(lo,hi);
     return returninrange(1,99,rnd);
 }
+
+function rectifyovr(pos1, attr, targetovr){
+    
+}

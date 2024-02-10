@@ -1,14 +1,15 @@
+<meta charset="UTF-8">
+
 <script src="https://cdn.jsdelivr.net/gh/scyppan/scyppan@v0.0.1/scyppan.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/scyppan/fifa23basetables@v0.0.1/tables.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/scyppan/attributemaker@v0.0.1/script.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/scyppan/appearancemaker@v0.0.1/script.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.1/tables.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.1/tools.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.1/appearances.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.1/attributes.js"></script>
 
-<script src="script.js"></script>
+<script src="rm23.js"></script>
 
-<div id="output">
-    Look in console for test values
-</div>
+Upload Template File <input type="file" id="uploadtemplate" style="overflow: visible;white-space:normal;" onchange="loadtemplate()" accept=".txt"></div>
 
-<script>
-    console.log(getplayerattributes(14, 27, -1, -1, 59));
-</script>
+<br><br>
+
+<textarea id="logger" readonly style="width: 95%; height: 10%;"></textarea>
