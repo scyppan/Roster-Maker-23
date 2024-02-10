@@ -1,4 +1,50 @@
-let uploadedplayers = [];
+let newplayers = [];
+let oldplayers=[];
+
+function defaultplayertbltgl() {
+  document.getElementById("uploadplayertblcontainer").style.display = document.getElementById("usedefault").checked ? "none" : "block";
+}
+
+async function processFile(file) {
+  try {
+    const foundplayers = await readplayertable(file);
+    // Code here will wait until the promise resolves
+    console.log(foundplayers);
+  } catch (error) {
+    // Handle errors
+    console.error(error);
+  }
+}
+
+//q: There's a file in this directory called defaultplayers.txt. Will this line: const response = await fetch('./defaultplayers.txt'); work?
+//a: No, it will not work. The fetch API is meant for use with HTTP requests, not local files. You can use the FileReader API to read local files.
+
+async function loadplayertable(whichfile) {
+  let file;
+
+  try {
+    if (whichfile == "default") {
+      loggerupdate("• Getting player table file");
+      const response = await fetch('./defaultplayers.txt');
+      const data = await response.text();
+      file = new Blob([data], { type: 'text/plain' }); // Convert text to a Blob if necessary
+    } else {
+      loggerupdate("• Getting player table file");
+      file = document.getElementById("uploadplayertbl").files[0];
+    }
+
+    if (!file) {
+      throw new Error('File is not selected or fetched.');
+    }
+
+    loggerupdate("• Loading player table");
+    oldplayers = await readplayertable(file); // Assuming readplayertable can handle both text and File/Blob inputs
+    loggerupdate("• Player table loaded (" + oldplayers.length + " players found)");
+  } catch (error) {
+    console.error('Error:', error);
+    loggerupdate("• Failed to load player table");
+  }
+}
 
 function loadtemplate(){
 	loggerupdate("• loading template");
@@ -45,27 +91,43 @@ function loadtemplate(){
 			}
 
 			if(player.nat && player.pos1 && player.pos2 && player.pos3 && player.pos4 && player.trnsfr && player.ovr){
-				uploadedplayers.push(player);
+				newplayers.push(player);
 				loggerupdate("• successfully loaded " + thislinearray[1] + " " + thislinearray[2] + (thislinearray[4] ? " (aka " + thislinearray[4] + ")" : ''));
 			}else{
 				loggerupdate("• FAILED to load" + thislinearray[1] + " " + thislinearray[2] + (thislinearray[4] ? thislinearray[4] : ''));
 			}
 		}	
 	  });
-	  	loggerupdate("• " + uploadedplayers.length + " players loaded");
-        makeplayers();
+	  	loggerupdate("• " + newplayers.length + " players loaded");
+      
 	}   
 }
 
 function makeplayers(){
-    loggerupdate("• Beginning to make players");
+    if(document.getElementById("usedefault").checked){
+      loadplayertable("default"){
+        
+      }
+    }
+
+    loggerupdate("• Checking requirements");
     
-    //demo
-    builddemographics()
+    if(checkrequirements()){
+      loggerupdate("• Requirements met");
+      loggerupdate("• Beginning to make players");
+    
+      uploadedplayers.forEach(player=>{
+      //demo
+      builddemographics(player.nat, player.height, player.weight, player.birthdate, player.ovr);
 
-    //appr
+      //appr
 
-    //attr
+      //attr
+      });  
+    }else{
+      loggerupdate("• Requirements not met");
+      
+    }
 }
 
 function buildrow(givenname, surname, demo, appr, attr){
@@ -202,6 +264,25 @@ function buildrow(givenname, surname, demo, appr, attr){
   ;
   
   return stringline;
+}
+
+function checkrequirements(){
+  let issue=false;
+
+  if(!document.getElementById("usedefault").checked){
+    if(!document.getElementById("uploadplayertbl").files[0]){
+      loggerupdate("• No player table file selected");
+      issue=true;
+    }
+  }
+
+  if(!document.getElementById("uploadtemplate").files[0]){
+    loggerupdate("• No template provided");
+    issue=true;
+  }
+  
+  return !issue; //if there's an issue, requirements are NOT met. So we return the opposite of issue.
+
 }
 
 function loggerupdate(newtext){

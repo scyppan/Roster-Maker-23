@@ -1,16 +1,35 @@
 <meta charset="UTF-8">
 
-<script src="https://cdn.jsdelivr.net/gh/scyppan/scyppan@v0.0.1/scyppan.js"></script>
+<!--
+Here's where the cdn scripts go.    
 <script src="https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.5/tables.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.5/tools.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.5/appearances.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.5/attributes.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.5/demographics.js"></script>
-
+<script src="https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.6/demographics.js"></script>
+-->
+<script src="https://cdn.jsdelivr.net/gh/scyppan/scyppan@v0.0.1/scyppan.js"></script>
 <script src="rm23.js"></script>
+<script src="appearances.js"></script>
+<script src="attributes.js"></script>
+<script src="demographics.js"></script>
+<script src="tables.js"></script>
+<script src="tools.js"></script>
+<script src="scyppan.js"></script>
+
+<h5>ROSTER MAKER 23<br>
+    by Liio</h5>
+
+<input type="checkbox" id="usedefault" onchange="defaultplayertbltgl()" checked="true"> Use Default Player Table</input><br><br>
+
+<div id="uploadplayertblcontainer" style="display:none">
+Upload player.txt Table <input type="file" id="uploadplayertbl" style="overflow: visible;white-space:normal;" onchange="loadplayertable()" accept=".txt">
+</div>
 
 Upload Template File <input type="file" id="uploadtemplate" style="overflow: visible;white-space:normal;" onchange="loadtemplate()" accept=".txt"></div>
 
 <br><br>
 
-<textarea id="logger" readonly style="width: 95%; height: 10%;"></textarea>
+<button onchange="makeplayers()">Make Players</button>
+
+<textarea id="logger" readonly style="width: 95%; height: 85%;"></textarea>
