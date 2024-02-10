@@ -10,8 +10,7 @@
 // alt keycode for the Åland Islands is 0197 
 
 function nations(){
-    return 
-[									
+    return [									
 {nation: "Albania",	toptier:1,	nationstartingfirstletter:1,	groupid:13,	isocountry:"AL",	nationid:1,	asn:0,	lt:54,	md:46,	dk:0},
 {nation: "Andorra",	toptier:1,	nationstartingfirstletter:1,	groupid:28,	isocountry:"AD",	nationid:2,	asn:0,	lt:33,	md:67,	dk:0},
 {nation: "Armenia",	toptier:1,	nationstartingfirstletter:1,	groupid:14,	isocountry:"AM",	nationid:3,	asn:0,	lt:27,	md:73,	dk:0},
