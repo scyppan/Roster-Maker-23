@@ -279,7 +279,7 @@ function loggerupdate(newtext){
 async function getdefaultplayers() {
   
   try {
-    const response = await fetch('https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.7/defaultplayers.txt');
+    const response = await fetch('https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.8/players-plain.txt');
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -291,10 +291,7 @@ async function getdefaultplayers() {
     let theseplayers = [];
 
     console.log(lines[5]);
-    let tstarray = lines[5].split('\t');
-    tstarray.forEach(item=>{item.replace(/\u0000/g, '');parseInt(item)});
-    console.log(tstarray);
-
+    
     lines.forEach(line=>{
       let thislinestring = line.split("\t");
       let thisline = castarrayasint(thislinestring);
