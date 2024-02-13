@@ -31,10 +31,6 @@ function returninrange(lo, hi, val){
 	
     array=array.sort(function(a, b){return a-b});
 
-    for(let i=0;i<10;i++){
-      console.log("idarray("+i+")="+array[i]);
-  }
-
     for (let i=1;i<array.length;i++){
       if(array.includes(i,0)){}else{return i;}
     }
