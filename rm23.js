@@ -1,30 +1,20 @@
 let newplayers = [];
 let oldplayers=[];
 let defaultplayersdata; // This will be assigned the fetched data
+let finalizedplayers=[];
 
-function defaultplayertbltgl() {
-  document.getElementById("uploadplayertblcontainer").style.display = document.getElementById("usedefault").checked ? "none" : "block";
-}
-
-function loadplayertable(whichfile) {
-  let file = null;
-  
-  if (whichfile == "default") {
-    loggerupdate("• Getting player table file");
-    file = document.getElementById("defaultplayertable");
-  } else {
-    loggerupdate("• Getting player table file");
-    file = document.getElementById("uploadplayertbl").files[0];
+function defaultentrytgl(table) {
+  switch(table){
+    case "players":
+      document.getElementById("uploadplayertblcontainer").style.display = document.getElementById("usedefaultplayers").checked ? "none" : "block";
+    break;
+    case "playernames":
+      document.getElementById("uploadplayernamestblcontainer").style.display = document.getElementById("usedefaultplayernames").checked ? "none" : "block";
+    break;
+    case "dcplayernames":
+      document.getElementById("uploaddcplayernamestblcontainer").style.display = document.getElementById("usedefaultdcplayernames").checked ? "none" : "block";
+    break;
   }
-
-  if (!file) {
-    loggerupdate("• Failed to get player table file");
-  }
-
-  loggerupdate("• Loading player table");
-  oldplayers = readplayertable(file); // Assuming readplayertable can handle both text and File/Blob inputs
-  loggerupdate("• Player table loaded (" + oldplayers.length + " players found)");
-  
 }
 
 function loadtemplate(){
@@ -48,6 +38,9 @@ function loadtemplate(){
 		if(thislinearray[0]){
 			loggerupdate("• attempting to read " + thislinearray[1] + " " + thislinearray[2] + (thislinearray[4] ? " (aka " + thislinearray[4] + ")" : ''));
 	
+      let gender=0;
+      if(!document.getElementById("genderelection").checked){gender=1;}
+
 			let player={
 				nat: thislinearray[0],
 				given: thislinearray[1] || "",
@@ -56,19 +49,22 @@ function loadtemplate(){
 				nick: thislinearray[4] || "",
 				trnsfr: thislinearray[5] || "{Ignore}",
 				ovr: parseInt(thislinearray[6]) || 65,
-				pos1: thislinearray[7] || "CM",
-				pos2: thislinearray[8] || "{none}",
-				pos3: thislinearray[9] || "{none}",
-				pos4: thislinearray[10] || "{none}",
+				pos1: getposition(thislinearray[7]) || 14,
+				pos2: getposition(thislinearray[8]) || -1,
+				pos3: getposition(thislinearray[9]) || -1,
+				pos4: getposition(thislinearray[10]) || -1,
 				foot: thislinearray[11] || "Right",
 				weak: thislinearray[12] || "Bad",
 				birthdate: Date.parse(thislinearray[13]) || Date.parse("01/01/2000"),
+        roughage: getroughage(Date.parse(thislinearray[13])) || Date.parse("01/01/2000"),
 				height: parseInt(thislinearray[14]) || 180,
 				weight: parseInt(thislinearray[15]) || 75,
 				attwrk: parseInt(thislinearray[16]) || 1,
 				defwrk: parseInt(thislinearray[17]) || 1,
 				skillmoves: parseInt(thislinearray[18]) || 1,
-				playerid: parseInt(thislinearray[19]) || -1
+				playerid: parseInt(thislinearray[19]) || -1,
+        gender: gender
+        
 			}
 
 			if(player.nat && player.pos1 && player.pos2 && player.pos3 && player.pos4 && player.trnsfr && player.ovr){
@@ -86,65 +82,84 @@ function loadtemplate(){
 
 function makeplayers(){
     
-    if(document.getElementById("usedefault").checked){
-      loggerupdate("• loading default player table");
-      loadplayertable("default");
-    }
+    loggerupdate("• making players");
+    finalizedplayers=[];
 
-    loggerupdate("• Checking requirements");
-    
-    if(checkrequirements()){
-      loggerupdate("• Requirements met");
-      loggerupdate("• Beginning to make players");
-    
-      uploadedplayers.forEach(player=>{
+    newplayers.forEach(player=>{
+      loggerupdate("• loading player demographics for " + player.given + " " + player.sur + (player.nick ? " (aka " + player.nick + ")" : ''));
+
+      let nation=nations().find(x=>x.nation==player.nat) || nations().find(x=>x.nationid==140);
+
       //demo
-      builddemographics(player.nat, player.height, player.weight, player.birthdate, player.ovr);
-
+      let demo=builddemographics(nation, player.height, player.weight, player.birthdate, player.ovr, player.id,player.given, player.sur, player.jersey, player.nick, player.foot, player.weak, player.gender, player.pos1, player.pos2, player.pos3, player.pos4, player.roughage, player.weak);
+      
       //appr
+      let attr=buildplayerattributes(player.pos1, player.pos2, player.pos3, player.pos4, player.ovr);
 
       //attr
+      let appr=buildplayerappearances(player.gender, nation);
+
+      //othr
+      let othr=buildothervars(player.attwrk, player.defwrk, player.skillmoves);
+
+      finalizedplayers.push({
+        [player.nick ? player.nick : player.given + " " + player.sur]: { // Dynamically choose the property name
+            demo,
+            attr,
+            appr,
+            othr
+        }
+      });
+
       });  
-    }else{
-      loggerupdate("• Requirements not met");
       
-    }
+      console.log(finalizedplayers);
+      buildonlynewfile();
+
+      //generate tables
+      //generate a playertable
+      //generate a editedplayernametable
 }
 
-function buildrow(givenname, surname, demo, appr, attr){
-        
+function buildplayertablerow(player){
+  
+  let demo=player[Object.keys(player)[0]].demo;
+  let appr=player[Object.keys(player)[0]].appr;
+  let attr=player[Object.keys(player)[0]].attr;
+  let othr=player[Object.keys(player)[0]].othr;
+
     let stringline = 
-  + "\t" + givenname //firstnameid
-  + "\t" + surname //lastnameid
-  + "\t" + "NULL" //jerseynameid
-  + "\t" + "NULL" //nicknameid
-  + "\t" + 0 //skintypecode
-  + "\t" + 0 //trait2
-  + "\t" + appr.haircolorcode
-  + "\t" + appr.facialhairtypecode
+  + "\t" + demo.firstnameid //firstnameid
+  + "\t" + demo.lastnameid //lastnameid
+  + "\t" + demo.jerseynameid //jerseynameid
+  + "\t" + demo.commonnameid //nicknameid
+  + "\t" + appr.skintypecode
+  + "\t" + othr.trait2 //trait2
+  + "\t" + appr.haircolorcode //haircolorcode
+  + "\t" + appr.facialhairtypecode //facialhairtypecode
   + "\t" + attr.curve
-  + "\t" + randbetween(0,1) //jerseystylecode
+  + "\t" + othr.jerseystylecode //jerseystylecode
   + "\t" + attr.agility
-  + "\t" + 0 //tattooback
-  + "\t" + 0 //accessorycode4
-  + "\t" + randbetween(0,1) //gksavetype
+  + "\t" + othr.tattooback //tattooback
+  + "\t" + othr.accessorycode4 //accessorycode4
+  + "\t" + othr.gksavetype //gksavetype
   + "\t" + attr.positioning
-  + "\t" + 0 //tattooleftarm
+  + "\t" + othr.tattooleftarm //tattooleftarm
   + "\t" + appr.hairtypecode
   + "\t" + attr.standingtackle
-  + "\t" + attr.pos3
+  + "\t" + demo.preferredposition3
   + "\t" + attr.longpassing
   + "\t" + attr.penalties
-  + "\t" + 0 //animpenaltiesstartposcode
-  + "\t" + 0 //isretiring
+  + "\t" + othr.animpenaltiesstartposcode //animpenaltiesstartposcode
+  + "\t" + othr.isretiring //isretiring
   + "\t" + attr.longshots
   + "\t" + attr.gkdiving
   + "\t" + attr.interceptions
-  + "\t" + 31 //shoecolorcode2
+  + "\t" + othr.shoecolorcode2 //shoecolorcode2
   + "\t" + attr.crossing
-  + "\t" + attr.potential
+  + "\t" + demo.potential
   + "\t" + attr.gkreflexes
-  + "\t" + 0 //finishingcode1
+  + "\t" + othr.finishingcode1 //finishingcode1
   + "\t" + attr.reactions
   + "\t" + attr.composure
   + "\t" + attr.vision
@@ -152,110 +167,152 @@ function buildrow(givenname, surname, demo, appr, attr){
   + "\t" + attr.finishing
   + "\t" + attr.dribbling
   + "\t" + attr.slidingtackle
-  + "\t" + 0 //accessorycode3
-  + "\t" + 0 //accessorycolourcode1
+  + "\t" + othr.accessorycode3 //accessorycode3
+  + "\t" + othr.accessorycolourcode1 //accessorycolourcode1
   + "\t" + appr.headtypecode
-  + "\t" + 66 // driref
+  + "\t" + othr.driref // driref
   + "\t" + attr.sprintspeed
   + "\t" + demo.height
-  + "\t" + 0 //hasseasonaljersey
-  + "\t" + 0 // tattoohead
-  + "\t" + attr.pos2
+  + "\t" + othr.hasseasonaljersey //hasseasonaljersey
+  + "\t" + othr.tattoohead // tattoohead
+  + "\t" + demo.preferredposition2
   + "\t" + attr.strength
-  + "\t" + appr.shoetypecode
+  + "\t" + othr.shoetypecode
   + "\t" + demo.birthdate
-  + "\t" + appr.pos1
-  + "\t" + 0 // tattooleftleg
+  + "\t" + demo.preferredposition1
+  + "\t" + othr.tattooleftleg // tattooleftleg
   + "\t" + attr.ballcontrol
-  + "\t" + 66 // phypos
+  + "\t" + othr.phypos // phypos
   + "\t" + attr.shotpower
-  + "\t" + 0 // trait1
-  + "\t" + appr.socklength
+  + "\t" + othr.trait1 // trait1
+  + "\t" + othr.socklengthcode
   + "\t" + demo.weight
-  + "\t" + 0 // hashighqualityhead
-  + "\t" + appr.gkglovetypecode
-  + "\t" + 0 // tattoorightarm
+  + "\t" + othr.hashighqualityhead // hashighqualityhead
+  + "\t" + othr.gkglovetypecode
+  + "\t" + othr.tattoorightarm // tattoorightarm
   + "\t" + attr.balance
-  + "\t" + 0 // gender
-  + "\t" + 267277 //headassetid
+  + "\t" + demo.gender // gender
+  + "\t" + othr.headassetid //headassetid
   + "\t" + attr.gkkicking
-  + "\t" + 62 //defspe
+  + "\t" + othr.defspe //defspe
   + "\t" + demo.internationalrep
   + "\t" + attr.shortpassing
   + "\t" + attr.freekickaccuracy
-  + "\t" + attr.skillmoves
-  + "\t" + appr.faceposerpreset
-  + "\t" + 1 //usercaneditname
-  + "\t" + 0 //avatarpomid
-  + "\t" + attr.attackingworkrate
-  + "\t" + 0 //finishingcode2
+  + "\t" + othr.skillmoves
+  + "\t" + othr.faceposerpreset
+  + "\t" + othr.usercaneditname //usercaneditname
+  + "\t" + othr.avatarpomid //avatarpomid
+  + "\t" + othr.attackingworkrate
+  + "\t" + othr.finishingcode2 //finishingcode2
   + "\t" + attr.aggression
   + "\t" + attr.acceleration
-  + "\t" + 66 //paskic
+  + "\t" + othr.paskic //paskic
   + "\t" + attr.headingaccuracy
-  + "\t" + 1 //iscustomized
+  + "\t" + othr.iscustomized //iscustomized
   + "\t" + appr.eyebrowcode
-  + "\t" + 0 //runningcode2
-  + "\t" + 0 //modifier
+  + "\t" + othr.runningcode2 //runningcode2
+  + "\t" + othr.modifier //modifier
   + "\t" + attr.gkhandling
   + "\t" + appr.eyecolorcode
-  + "\t" + 1 //jerseysleevelengthcode
-  + "\t" + 0 //accessorycolourcode3
-  + "\t" + 0 //accessorycode1
-  + "\t" + 160273 //playerjointeamdate
-  + "\t" + 1 //headclasscode
-  + "\t" + attr.defensiveworkrate
-  + "\t" + 0 //tattoofront
-  + "\t" + demo.natid
+  + "\t" + othr.jerseysleevelengthcode //jerseysleevelengthcode
+  + "\t" + othr.accessorycolourcode3 //accessorycolourcode3
+  + "\t" + othr.accessorycode1 //accessorycode1
+  + "\t" + othr.playerjointeamdate //playerjointeamdate
+  + "\t" + othr.headclasscode //headclasscode
+  + "\t" + othr.defensiveworkrate
+  + "\t" + othr.tattoofront //tattoofront
+  + "\t" + demo.nationalityid
   + "\t" + demo.foot
-  + "\t" + 0 //sideburnscode
-  + "\t" + demo.weakfoot
+  + "\t" + appr.sideburnscode //sideburnscode
+  + "\t" + demo.weakfootabilitytypecode
   + "\t" + attr.jumping
   + "\t" + demo.personality
-  + "\t" + 0 //gkkickstyle
+  + "\t" + othr.gkkickstyle //gkkickstyle
   + "\t" + attr.stamina
   + "\t" + demo.playerid
-  + "\t" + 0 //accessorycolourcode4
+  + "\t" + othr.accessorycolourcode4 //accessorycolourcode4
   + "\t" + attr.gkpositioning
-  + "\t" + 0 //headvariation
-  + "\t" + 2 //skillmoveslikelihood
-  + "\t" + 60 //shohan
-  + "\t" + appr.skintone
-  + "\t" + 0 //shortstyle
-  + "\t" + attr.ovr
-  + "\t" + 503 //smallsidedshoetypecode
-  + "\t" + 2 //emotion
-  + "\t" + 0 //runstylecode
-  + "\t" + 0 //jerseyfit
-  + "\t" + 0 //accessorycode2
-  + "\t" + 0 //shoedesigncode
-  + "\t" + 30 //shoecolorcode1
-  + "\t" + 0 //hairstylecode
-  + "\t" + 0 //bodytypecode
-  + "\t" + 0 //animpenaltiesstartposcode
-  + "\t" + 60 //pacdiv
+  + "\t" + othr.headvariation //headvariation
+  + "\t" + othr.skillmoveslikelihood //skillmoveslikelihood
+  + "\t" + othr.shohan //shohan
+  + "\t" + appr.skintonecode
+  + "\t" + othr.shortstyle //shortstyle
+  + "\t" + demo.overallrating
+  + "\t" + othr.smallsidedshoetypecode //smallsidedshoetypecode
+  + "\t" + othr.emotion //emotion
+  + "\t" + othr.runstylecode //runstylecode
+  + "\t" + othr.jerseyfit //jerseyfit
+  + "\t" + othr.accessorycode2 //accessorycode2
+  + "\t" + othr.shoedesigncode //shoedesigncode
+  + "\t" + othr.shoecolorcode1 //shoecolorcode1
+  + "\t" + othr.hairstylecode //hairstylecode
+  + "\t" + othr.bodytypecode //bodytypecode
+  + "\t" + othr.animpenaltiesstartposcode //animpenaltiesstartposcode
+  + "\t" + othr.pacdiv //pacdiv
   + "\t" + attr.defensiveawareness
-  + "\t" + 0 //runningcode1
-  + "\t" + attr.pos4
+  + "\t" + othr.runningcode1 //runningcode1
+  + "\t" + demo.preferredposition4
   + "\t" + attr.volleys
-  + "\t" + 0 //accessorycolourcode2
-  + "\t" + 0 //tattoorightleg
+  + "\t" + othr.accessorycolourcode2 //accessorycolourcode2
+  + "\t" + othr.tattoorightleg //tattoorightleg
   + "\t" + appr.haircolorcode // facialhaircolorcode
- 	  
   ;
   
   return stringline;
 }
 
+function buildonlynewfile(){
+
+  let lines = [playertableheaderrow()];
+
+  finalizedplayers.forEach(player=>{
+    lines.push(buildplayertablerow(player));
+  });
+
+  const now = new Date();
+  const datetimeString = `${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}-${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
+
+  let txtcontent = lines.join("\n");
+  let blob = new Blob([txtcontent], {type: "text/plain;charset=utf-8"});
+
+  downloadtxt(txtcontent,`rm23output-players-${datetimeString}.txt`);
+
+  //q: how can I add a date time stamp to the file name? Write syntax
+
+  //a: You can use the Date object to get the current date and time, and then use the toLocaleString method to format it. Here's an example:
+  //a:
+  
+}
+
 function checkrequirements(){
   let issue=false;
 
-  if(document.getElementById("usedefault").checked){
+  if(document.getElementById("usedefaultplayers").checked){
     loggerupdate("• Using default player table");
 
   }else{
     if(!document.getElementById("uploadplayertbl").files[0]){
       loggerupdate("• No player table file selected");
+      issue=true;
+    }
+  }
+
+  if(document.getElementById("usedefaultplayernames").checked){
+    loggerupdate("• Using default playernames table");
+
+  }else{
+    if(!document.getElementById("uploadplayertbl").files[0]){
+      loggerupdate("• No playernames table file selected");
+      issue=true;
+    }
+  }
+
+  if(document.getElementById("usedefaultdcplayernames").checked){
+    loggerupdate("• Using default dcplayernames table");
+
+  }else{
+    if(!document.getElementById("uploadplayertbl").files[0]){
+      loggerupdate("• No dcplayer table file selected");
       issue=true;
     }
   }
@@ -266,7 +323,8 @@ function checkrequirements(){
   }
   
   if(!issue){
-    document.getElementById("mkplybtn.disabled") = false;
+    loggerupdate("• No issues found!");
+    document.getElementById("mkplybtn").disabled = false;
   }
 
 }
@@ -275,42 +333,3 @@ function loggerupdate(newtext){
 	let oldtext = document.getElementById("logger").value;
 	document.getElementById("logger").value = newtext + "\n" + oldtext.trim() ;
 }
-
-async function getdefaultplayers() {
-  
-  try {
-    const response = await fetch('https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.10/origplayers.txt');
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    defaultplayersdata = await response.text(); // Assign fetched data
-
-    let lines=defaultplayersdata.split('\n');
-    lines.shift();
-    
-    console.log(lines[5].split('\t'));
-
-    let theseplayers = [];
-    
-    lines.forEach(line=>{
-      let thislinestring = line.split("\t");
-      let thisline = castarrayasint(thislinestring);
-      if(thisline[100]!=0){//ensures that the player has an ID
-        if(Number.isNaN(thisline[0])){}else{
-          theseplayers.push(thisline);
-        }
-      }
-    });
-    oldplayers = theseplayers;
-    document.getElementById("outercontainer").style.display = "block";
-  } catch (error) {
-    console.error('There has been a problem with your fetch operation:', error);
-  }  
-  
-}
-
-function startup(){
-  
-}
-
-getdefaultplayers();

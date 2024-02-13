@@ -1,4 +1,6 @@
-function getplayerattributes(pos1, pos2, pos3, pos4, ovr){
+let global="";
+
+function buildplayerattributes(pos1, pos2, pos3, pos4, ovr){
 	let attr=setinitialatttributes(ovr);
 	attr = gkadjustment(pos1, pos2, pos3, pos4, ovr, attr);
 	attr = getattributesforpos(pos4, ovr, attr);
@@ -6,6 +8,8 @@ function getplayerattributes(pos1, pos2, pos3, pos4, ovr){
 	attr = getattributesforpos(pos2, ovr, attr);
 	attr = getattributesforpos(pos1, ovr, attr);
 	
+    attr = rectifyovr(pos1, attr, ovr); 
+
 	return attr;
 }
 
@@ -95,7 +99,8 @@ function gkadjustment(pos1, pos2, pos3, pos4, ovr, attr){
 }
 
 function getattributesforpos(pos, ovr, attr){
-		switch(setmap(pos)){
+
+    switch(setmap(pos)){
 		
 		case 2:
             attr.crossing = Math.max(attr.crossing, getattributevalue(ovr));
@@ -314,6 +319,42 @@ function getattributevalue(ovr){
     return returninrange(1,99,rnd);
 }
 
-function rectifyovr(pos1, attr, targetovr){
+function adjustsingleattrval(attr, pos1, mod) {
+
+    // Get the key attributes for the given position
+    let attributesOfImportance = attributesbyposition(pos1);
+
+    // Randomly select one attribute to adjust
+    let rndIndex = Math.floor(Math.random() * attributesOfImportance.length);
+    let attrToAdjust = attributesOfImportance[rndIndex];
     
+    //let oldValue = attr[attrToAdjust];
+
+    // Ensure the modification does not exceed the attribute bounds
+    let newValue = Math.max(1, Math.min(99, attr[attrToAdjust] + mod));
+
+    // Apply the adjustment
+    attr[attrToAdjust] = newValue;
+
+    return attr; // Return the modified attributes object
 }
+
+function attributesbyposition(pos1){
+    let pos=setmap(pos1);
+    switch(pos){
+        case 0: return ["reactions", "gkdiving","gkhandling","gkkicking","gkpositioning","gkreflexes"];
+        case 2: return ["crossing","shortpassing","defensiveawareness","standingtackle","slidingtackle","dribbling","ballcontrol","stamina","acceleration","sprintspeed","reactions","interceptions"];
+        case 3: return ["crossing","headingaccuracy","shortpassing","defensiveawareness","standingtackle","slidingtackle","ballcontrol","stamina","acceleration","sprintspeed","reactions","interceptions"];
+        case 5: return ["headingaccuracy","shortpassing","defensiveawareness","standingtackle","slidingtackle","ballcontrol","jumping","strength","sprintspeed","reactions","aggression","interceptions"];
+        case 10: return ["shortpassing","defensiveawareness","standingtackle","slidingtackle","longpassing","ballcontrol","stamina","strength","reactions","aggression","interceptions","vision"];
+        case 12: return ["crossing","finishing","shortpassing","dribbling","longpassing","ballcontrol","stamina","acceleration","sprintspeed","reactions","positioning","vision"];
+        case 14: return ["finishing","shortpassing","standingtackle","dribbling","longpassing","ballcontrol","stamina","longshots","reactions","interceptions","positioning","vision"];
+        case 18: return ["finishing","shortpassing","dribbling","longpassing","ballcontrol","longshots","acceleration","sprintspeed","agility","reactions","positioning","vision"];
+        case 21: return ["finishing","headingaccuracy","shortpassing","volleys","dribbling","ballcontrol","shotpower","acceleration","sprintspeed","reactions","positioning","vision"];
+        case 23: return ["crossing","finishing","shortpassing","dribbling","ballcontrol","longshots","acceleration","sprintspeed","agility","reactions","positioning","vision"];
+        case 25: return ["finishing","headingaccuracy","shortpassing","volleys","dribbling","ballcontrol","shotpower","strength","longshots","acceleration","sprintspeed","reactions","positioning","vision"];
+    }
+}
+
+
+

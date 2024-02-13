@@ -8,33 +8,44 @@ Here's where the cdn scripts go.
 <script src="https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.5/attributes.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/scyppan/roster-maker-23@a0.0.6/demographics.js"></script>
 -->
-<script src="https://cdn.jsdelivr.net/gh/scyppan/scyppan@v0.0.1/scyppan.js"></script>
-<script src="rm23.js"></script>
-<script src="appearances.js"></script>
-<script src="attributes.js"></script>
-<script src="demographics.js"></script>
-<script src="tables.js"></script>
-<script src="tools.js"></script>
-<script src="scyppan.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/scyppan/scyppan@v0.0.1/scyppan.js" defer></script>
+<script src="rm23.js" defer></script>
+<script src="appearances.js" defer></script>
+<script src="attributes.js" defer></script>
+<script src="demographics.js" defer></script>
+<script src="tools.js" defer></script>
+<script src="scyppan.js" defer></script>
+<script src="tables.js" defer></script>
+<script src="othervars.js" defer></script>
 
-<h5>ROSTER MAKER 23<br>
-    by Liio</h5>
+<div style="display: flex; justify-content: center; align-items: center; margin: 0;">
+<h5>ROSTER MAKER 23 (by Liio)</h5>
+</div><!--header close-->
 
-<div id="outercontainer" style="display:none">
-
-<input type="checkbox" id="usedefault" onchange="defaultplayertbltgl()" checked="true"> Use Default Player Table</input><br><br>
-
+<div id="outercontainer">
+<input type="checkbox" id="usedefaultplayers" onchange="defaultentrytgl('players')" checked="true"> Use Default Player Table</input>
 <div id="uploadplayertblcontainer" style="display:none">
 Upload player.txt Table <input type="file" id="uploadplayertbl" style="overflow: visible;white-space:normal;" onchange="loadplayertable()" accept=".txt">
-</div>
+</div><br>
+<input type="checkbox" id="usedefaultplayernames" onchange="defaultentrytgl('playernames')" checked="true"> Use Default PlayerNames Table</input>
+<div id="uploadplayernamestblcontainer" style="display:none">
+Upload playernames.txt Table <input type="file" id="uploadplayernamestbl" style="overflow: visible;white-space:normal;" onchange="loadplayertable()" accept=".txt">
+</div><br>
+<input type="checkbox" id="usedefaultdcplayernames" onchange="defaultentrytgl('dcplayernames')" checked="true"> Use Default DCPlayerNames Table</input>
+<div id="uploaddcplayernamestblcontainer" style="display:none">
+Upload dcplayernames.txt Table <input type="file" id="uploadplayerdcplayernamestbl" style="overflow: visible;white-space:normal;" onchange="loadplayertable()" accept=".txt">
+</div><br>
 
-Upload Template File <input type="file" id="uploadtemplate" style="overflow: visible;white-space:normal;" onchange="loadtemplate()" accept=".txt"></div>
-
-<br><br>
+<br>
+<hr>
+<br>
+Upload Template File <input type="file" id="uploadtemplate" style="overflow: visible;white-space:normal;" onchange="loadtemplate()" accept=".txt">
+<input type="checkbox" id="genderelection" checked="true" title="Uncheck to create woman-identified players">Use male gender</input>
+<br><hr><br>
 
 <button id="chkreqbtn" onclick="checkrequirements()" disabled="true">Check Requirements</button>
 <button id="mkplybtn" onclick="makeplayers()" disabled="true">Make Players</button>
 
 <textarea id="logger" readonly style="width: 95%; height: 85%;"></textarea>
 
-</div>
+</div><!--Outercontainerdiv close-->

@@ -4,10 +4,11 @@ function randbetween(min, max) { // min and max included
   }
   
 function returninrange(lo, hi, val){
+
       if(val>hi){return hi;}
-    if(val<lo){return lo;}else{
-    return val;
-    }
+      if(val<lo){return lo;}else{
+      return val;
+      }
   }
 
   function downloadtxt(txt,filename){
@@ -24,4 +25,23 @@ function returninrange(lo, hi, val){
       });
       
     return result;
+  }
+
+  function getfreeid(array){
+	
+    array=array.sort(function(a, b){return a-b});
+
+    for(let i=0;i<10;i++){
+      console.log("idarray("+i+")="+array[i]);
+  }
+
+    for (let i=1;i<array.length;i++){
+      if(array.includes(i,0)){}else{return i;}
+    }
+    
+    return array.length;
+  }
+
+  function checkiffreeid(id, array){
+    return !array.includes(id);
   }
